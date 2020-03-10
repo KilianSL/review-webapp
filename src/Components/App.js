@@ -8,13 +8,14 @@ class App extends Component{
     constructor(props){
         super(props)
         this.state = {
-            score : 0
+            score : 0.5
         }
     }
 
     submitScore = () => {
+        document.getElementById('review').value=""
         this.setState({
-            score : 0
+            score : 0.5
         })
     }
 
@@ -24,7 +25,7 @@ class App extends Component{
         fetch('http://127.0.0.1:5000/?value=' + newvalue)
         .then(request => request.text())
         .then(newscore => this.setState({
-            score : parseFloat(newscore).toFixed(2)
+            score : parseFloat(newscore).toFixed(2),
         }))
     }
 
