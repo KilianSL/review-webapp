@@ -1,12 +1,12 @@
 import torch
 import torch.nn.functional as F 
-#from model import CharacterLevelCNN
-#from utils import predict_sentiment
+from model import BERTGRUSentiment
+from utils import predict_sentiment, tokenize_sentence
 
-#model = CharacterLevelCNN()
-#model_path = 'src/nlp_api/models/nlp_model.pth'
-#model.load_state_dict(torch.load(model_path))
-#model.eval()
+model = BERTGRUSentiment(256,1,2,True,0.25)
+model_path = 'src/nlp_api/models/BERTGRU_model.pth'
+model.load_state_dict(torch.load(model_path))
+model.eval()
 
 
 
@@ -22,10 +22,9 @@ CORS(app)
 
 @app.route('/', methods=['GET']) # Returns sentiment score based on value of get request
 def predict():
-    #params = model.get_model_parameters()
     review = request.args['value']
     # print(review)
-    score = #3 predict_sentiment(model, review, **params)
+    score = predict_sentiment(model, tokenize_sentence, review)
     print(score)
     return jsonify(float(score))
 
