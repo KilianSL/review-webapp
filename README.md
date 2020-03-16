@@ -1,8 +1,8 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
 
 ## Starting the service
-+ Run api.py (will listen on 127.0.0.1:5000)
-+ Run npm start in project directory (will host on localhost:3000)
++ Run `api.py` (will listen on 127.0.0.1:5000)
++ Run `npm start` in project directory (will host on localhost:3000)
 
 ## Available Scripts
 
