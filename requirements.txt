@@ -2,3 +2,6 @@ torch
 flask
 flask-cors
 numpy
+transformers
+torchtext
+spacy
