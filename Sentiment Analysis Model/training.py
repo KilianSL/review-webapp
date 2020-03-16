@@ -106,7 +106,7 @@ def evaluate(model, iterator, criterion):
             
             loss = criterion(predictions, batch.label)
             
-            acc = binary_accuracy(predictions, batch.label)
+            acc = accuracy(predictions, batch.label)
 
             epoch_loss += loss.item()
             epoch_acc += acc.item()
@@ -127,7 +127,7 @@ def train(model, epochs, train_iterator, valid_iterator, optimizer, criterion):
 
         start_time = time.time()
 
-        train_loss, train_acc = train(model, train_iterator, optimizer, criterion)
+        train_loss, train_acc = train_single_epoch(model, train_iterator, optimizer, criterion)
         valid_loss, valid_acc = evaluate(model, valid_iterator, criterion)
 
         end_time = time.time()
@@ -195,7 +195,7 @@ print(f'Test Loss: {test_loss:.3f} | Test Acc: {test_acc*100:.2f}%')
 def predict_sentiment(model, tokenizer, sentence):
     model.eval()
     tokens = tokenizer.tokenize(sentence)
-    tokens = tokens[:max_input_length-2]
+    tokens = tokens[:max_input_len-2]
     indexed = [init_token_idx] + tokenizer.convert_tokens_to_ids(tokens) + [eos_token_idx]
     tensor = torch.LongTensor(indexed).to(device)
     tensor = tensor.unsqueeze(0)
