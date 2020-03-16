@@ -1,6 +1,8 @@
 # Sentiment Analysis React App
 
 ## Starting the service
++ Install requirements with `npm install` & `pip install -r requirements.txt`
++ Download spaCy models with `python -m spacy download en`
 + Run `api.py` (will listen on 127.0.0.1:5000)
 + Run `npm start` in project directory (will host on localhost:3000)
 
