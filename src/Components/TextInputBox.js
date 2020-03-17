@@ -10,15 +10,10 @@ class TextInputBox extends Component{
         }
     }
 
-    updateState(newval){
-        this.setState({
-            value : newval
-        })
-        this.props.callback(newval)
-    }
-
     handleChange(event){
-        this.updateState(event.target.value)
+        this.setState({
+            value: event.target.value
+        }, this.props.callback(event.target.value))
     }
 
     render(){
