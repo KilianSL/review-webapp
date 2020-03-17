@@ -1,128 +1,59 @@
-import json
 import torch
 import torch.nn as nn
+from transformers import BertModel
+from transformers import BertTokenizer
 
-
-class CharacterLevelCNN(nn.Module):
+class Tokenizer():
     def __init__(self):
-        super(CharacterLevelCNN, self).__init__()
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self.max_input_len = self.tokenizer.max_model_input_sizes['bert-base-uncased']
+        self.init_token_idx = self.tokenizer.cls_token_id
+        self.eos_token_idx = self.tokenizer.sep_token_id
+        self.pad_token_idx = self.tokenizer.pad_token_id
+        self.unk_token_idx = self.tokenizer.unk_token_id
 
-        # model parameters
-        self.number_of_characters = 69
-        # self.extra_characters = "éàèùâêîôûçëïü"
-        self.extra_characters = ""
-        self.alphabet = "abcdefghijklmnopqrstuvwxyz0123456789-,;.!?:'\"/\\|_@#$%^&*~`+ =<>()[]{}"
-        self.max_length = 1014
-        self.number_of_classes = 3
-        self.dropout_input_p = 0
+    def tokenize_sentence(self, sentence):
+        tokens = self.tokenizer.tokenize(sentence)
+        tokens = tokens[:self.max_input_len-2]
+        return tokens
 
-        # define dropout input
 
-        self.dropout_input = nn.Dropout2d(self.dropout_input_p)
+class BERTGRUSentiment(nn.Module): # Model to predict sentiment using pretrained BERT embeddings + Gated Recurrent Unit
+    def __init__(self, hidden_dim, output_dim, n_layers, bidirectional, dropout):
+        super().__init__()
 
-        # define conv layers
+        self.bert = BertModel.from_pretrained('bert-base-uncased')
 
-        self.conv1 = nn.Sequential(nn.Conv1d(self.number_of_characters + len(self.extra_characters),
-                                             256,
-                                             kernel_size=7,
-                                             padding=0),
-                                   nn.ReLU(),
-                                   nn.MaxPool1d(3)
-                                   )
+        embedding_dim = self.bert.config.to_dict()['hidden_size']
 
-        self.conv2 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=7, padding=0),
-                                   nn.ReLU(),
-                                   nn.MaxPool1d(3)
-                                   )
+        self.rnn = nn.GRU(embedding_dim, hidden_dim, num_layers=n_layers, bidirectional=bidirectional, batch_first=True, dropout=dropout)
 
-        self.conv3 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=3, padding=0),
-                                   nn.ReLU()
-                                   )
+        if bidirectional:
+            fc_dim = hidden_dim * 2
+        else:
+            fc_dim = hidden_dim
 
-        self.conv4 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=3, padding=0),
-                                   nn.ReLU()
-                                   )
+        self.out = nn.Linear(fc_dim, output_dim)
 
-        self.conv5 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=3, padding=0),
-                                   nn.ReLU()
-                                   )
-
-        self.conv6 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=3, padding=0),
-                                   nn.ReLU(),
-                                   nn.MaxPool1d(3)
-                                   )
-
-        # compute the  output shape after forwarding an input to the conv layers
-
-        input_shape = (128,
-                       self.max_length,
-                       self.number_of_characters + len(self.extra_characters))
-        self.output_dimension = self._get_conv_output(input_shape)
-
-        # define linear layers
-
-        self.fc1 = nn.Sequential(
-            nn.Linear(self.output_dimension, 1024),
-            nn.ReLU(),
-            nn.Dropout(0.5)
-        )
-
-        self.fc2 = nn.Sequential(
-            nn.Linear(1024, 1024),
-            nn.ReLU(),
-            nn.Dropout(0.5)
-        )
-
-        self.fc3 = nn.Linear(1024, self.number_of_classes)
-
-        # initialize weights
-
-        self._create_weights()
-
-    # utility private functions
-
-    def _create_weights(self, mean=0.0, std=0.05):
-        for module in self.modules():
-            if isinstance(module, nn.Conv1d) or isinstance(module, nn.Linear):
-                module.weight.data.normal_(mean, std)
-
-    def _get_conv_output(self, shape):
-        x = torch.rand(shape)
-        x = x.transpose(1, 2)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-        x = self.conv5(x)
-        x = self.conv6(x)
-        x = x.view(x.size(0), -1)
-        output_dimension = x.size(1)
-        return output_dimension
-
-    # get model params:
-
-    def get_model_parameters(self):
-        return {
-            'alphabet': self.alphabet,
-            'extra_characters': self.extra_characters,
-            'number_of_characters': self.number_of_characters,
-            'max_length': self.max_length,
-            'num_classes': self.number_of_classes
-        }
-
-    # forward
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
-        x = self.dropout_input(x)
-        x = x.transpose(1, 2)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-        x = self.conv5(x)
-        x = self.conv6(x)
-        x = x.view(x.size(0), -1)
-        x = self.fc1(x)
-        x = self.fc2(x)
-        x = self.fc3(x)
-        return x
+        # B=batch_size, T=tokens in x, 
+        # x = [B,T]
+
+        with torch.no_grad():
+            embedded = self.bert(x)[0]
+        # embedded = [B,T,embedding_len]
+
+        _, hidden = self.rnn(embedded)
+        # hidden = [n_layers*n_direction, B, embedding_len]
+
+        if self.rnn.bidirectional:
+            hidden = self.dropout(torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim = 1))
+        else:
+            hidden = self.dropout(hidden[-1,:,:])
+        # hidden = [B,hidden_dim]
+
+        output = self.out(hidden)
+        
+        return output

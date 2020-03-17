@@ -3,7 +3,7 @@ import TextInputBox from './TextInputBox'
 import ScoreBar from './ScoreBar'
 import './css/App.css'
 
-class App extends Component{
+class Home extends Component{
     
     constructor(props){
         super(props)
@@ -22,7 +22,7 @@ class App extends Component{
 
     updateScore = (newvalue) => {
         console.log(newvalue)
-        fetch('http://127.0.0.1:5000/?value=' + newvalue)
+        fetch('http://127.0.0.1:5000/?value=' + newvalue) // Fetches sentiment score from pytorch api
         .then(request => request.text())
         .then(newscore => this.setState({
             score : parseFloat(newscore).toFixed(2),
@@ -45,4 +45,4 @@ class App extends Component{
     }
 }
 
-export default App
+export default Home
