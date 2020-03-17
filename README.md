@@ -10,7 +10,7 @@
 
 **`Version 0.1.0`**
 + Changed NLP model from 1D Convolutional to BERT-based Gated Recurrent Unit (untrained)
-+ Updated API to process calls using BERTGRU
++ Updated API to process calls using GRUBERT
 + Model now also includes class for tokenization
 
 **`Version 0.0.2`**
