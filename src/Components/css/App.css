@@ -31,3 +31,9 @@ h1{
 button > span{
     margin-right: 10px;
 }
+
+button:hover > i{
+    transform: rotate(30deg) scale(1.2);
+    transform-origin: center;
+    transition-duration: 100ms;
+}
