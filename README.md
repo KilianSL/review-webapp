@@ -8,6 +8,11 @@
 
 ## Changelog
 
+**`Version 0.1.0`**
++ Changed NLP model from 1D Convolutional to BERT-based Gated Recurrent Unit (untrained)
++ Updated API to process calls using BERTGRU
++ Model now also includes class for tokenization
+
 **`Version 0.0.2`**
 + Implemented callback function to update UI when sentiment score is returned
 + Implemented changing background colour on progress bar depending on score value
