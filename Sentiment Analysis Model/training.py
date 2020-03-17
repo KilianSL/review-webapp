@@ -31,21 +31,28 @@ def tokenize_sentence(sentence):
     return tokens
 
 # define dataset
-from torchtext import data, datasets
+from torchtext import data
 
-TEXT = data.Field(batch_first=True, 
-                  use_vocab=False, 
-                  tokenize=tokenize_sentence, 
-                  preprocessing=tokenizer.convert_tokens_to_ids,
+TEXT = data.Field(batch_first = True,
+                  use_vocab = False,
+                  tokenize = tokenize_sentence,
+                  preprocessing = tokenizer.convert_tokens_to_ids,
                   init_token = init_token_idx,
                   eos_token = eos_token_idx,
                   pad_token = pad_token_idx,
                   unk_token = unk_token_idx)
 
-LABEL = data.LabelField(dtype=torch.float)
+LABEL = data.LabelField(dtype = torch.float)
+
+
+
+
+from torchtext import datasets
 
 train_data, test_data = datasets.IMDB.splits(TEXT, LABEL)
+
 train_data, valid_data = train_data.split(random_state = random.seed(SEED))
+
 print(f"Number of training examples: {len(train_data)}")
 print(f"Number of validation examples: {len(valid_data)}")
 print(f"Number of testing examples: {len(test_data)}")
@@ -56,10 +63,9 @@ BATCH_SIZE = 128
 
 # Create data itertors
 train_iterator, valid_iterator, test_iterator = data.BucketIterator.splits(
-    (train_data, valid_data, test_data),
-    batch_sizes=BATCH_SIZE,
-    device=device
-)
+    (train_data, valid_data, test_data), 
+    batch_size = BATCH_SIZE, 
+    device = device)
 
 # Training, Test and Evaluation procedures
 

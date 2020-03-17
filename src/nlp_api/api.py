@@ -1,13 +1,14 @@
 import torch
-import torch.nn.functional as F 
-from model import BERTGRUSentiment
-from utils import predict_sentiment, tokenize_sentence
+import torch.nn.functional as F
+import pytorch_pretrained_bert as ppb
+from model import BERTGRUSentiment, Tokenizer
+from utils import predict_sentiment
 
 model = BERTGRUSentiment(256,1,2,True,0.25)
-model_path = 'src/nlp_api/models/BERTGRU_model.pth'
-model.load_state_dict(torch.load(model_path))
+#model_path = 'src/nlp_api/models/BERTGRU_model.pth'
+#model.load_state_dict(torch.load(model_path))
 model.eval()
-
+tokenizer = Tokenizer()
 
 
 import flask
@@ -24,7 +25,7 @@ CORS(app)
 def predict():
     review = request.args['value']
     # print(review)
-    score = predict_sentiment(model, tokenize_sentence, review)
+    score = predict_sentiment(model, tokenizer, review)
     print(score)
     return jsonify(float(score))
 

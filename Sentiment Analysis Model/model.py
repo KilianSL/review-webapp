@@ -6,7 +6,7 @@ class BERTGRUSentiment(nn.Module): # Model to predict sentiment using pretrained
     def __init__(self, hidden_dim, output_dim, n_layers, bidirectional, dropout):
         super().__init__()
 
-        self.bert = BertModel.from_pretrained('bert-best-uncased')
+        self.bert = BertModel.from_pretrained('bert-base-uncased')
 
         embedding_dim = self.bert.config.to_dict()['hidden_size']
 

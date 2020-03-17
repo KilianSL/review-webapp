@@ -1,12 +1,28 @@
 import torch
 import torch.nn as nn
 from transformers import BertModel
+from transformers import BertTokenizer
+
+class Tokenizer():
+    def __init__(self):
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self.max_input_len = self.tokenizer.max_model_input_sizes['bert-base-uncased']
+        self.init_token_idx = self.tokenizer.cls_token_id
+        self.eos_token_idx = self.tokenizer.sep_token_id
+        self.pad_token_idx = self.tokenizer.pad_token_id
+        self.unk_token_idx = self.tokenizer.unk_token_id
+
+    def tokenize_sentence(self, sentence):
+        tokens = self.tokenizer.tokenize(sentence)
+        tokens = tokens[:self.max_input_len-2]
+        return tokens
+
 
 class BERTGRUSentiment(nn.Module): # Model to predict sentiment using pretrained BERT embeddings + Gated Recurrent Unit
     def __init__(self, hidden_dim, output_dim, n_layers, bidirectional, dropout):
         super().__init__()
 
-        self.bert = BertModel.from_pretrained('bert-best-uncased')
+        self.bert = BertModel.from_pretrained('bert-base-uncased')
 
         embedding_dim = self.bert.config.to_dict()['hidden_size']
 
