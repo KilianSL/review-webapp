@@ -22,14 +22,11 @@ class Home extends Component{
 
     updateScore = (newvalue) => {
         console.log(newvalue)
-        // fetch('http://127.0.0.1:5000/?value=' + newvalue) // Fetches sentiment score from pytorch api
-        // .then(request => request.text())
-        // .then(newscore => this.setState({
-        //     score : parseFloat(newscore).toFixed(2),
-        // }))
-        this.setState({
-            score : Math.random().toFixed(2)
-        })
+        fetch('http://127.0.0.1:5000/?value=' + newvalue) // Fetches sentiment score from pytorch api
+        .then(request => request.text())
+        .then(newscore => this.setState({
+            score : parseFloat(newscore).toFixed(2),
+        }))
     }
 
     render(){
