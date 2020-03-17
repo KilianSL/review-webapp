@@ -21,6 +21,7 @@ class TextInputBox extends Component{
             <div className="form-group shadow-textarea">
                 <textarea 
                 className="form-control z-depth-1" 
+                style={{resize: "none"}}
                 id="review" 
                 rows="8" 
                 placeholder="Write something here..." 
